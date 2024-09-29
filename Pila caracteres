@@ -1,0 +1,150 @@
+import java.util.*;
+
+public class PilaCaracteresPersonalizada {
+    private final char[] elementos;
+    private int indiceTope;
+    private final int maxElementos = 26; // Capacidad fija de 26
+    private final Random generador;
+
+    public PilaCaracteresPersonalizada() {
+        this.elementos = new char[maxElementos];
+        this.indiceTope = -1; // La pila comienza vacía
+        this.generador = new Random();
+    }
+
+    // Verificar si la pila está completa
+    public boolean esCompleta() {
+        return indiceTope == maxElementos - 1;
+    }
+
+    // Verificar si la pila está vacía
+    public boolean esVacia() {
+        return indiceTope == -1;
+    }
+
+    // Genera un carácter aleatorio: letra, número o símbolo especial
+    private char crearCaracterAleatorio() {
+        int tipoCaracter = generador.nextInt(3); // 0 = letra, 1 = número, 2 = símbolo
+        switch (tipoCaracter) {
+            case 0 -> {
+                return (char) (generador.nextInt(26) + 'A'); // Letra A-Z
+            }
+            case 1 -> {
+                return (char) (generador.nextInt(10) + '0'); // Número 0-9
+            }
+            default -> {
+                char[] simbolos = { '!', '#', '$', '%', '&', '(', ')', '*', '@', '^' };
+                return simbolos[generador.nextInt(simbolos.length)]; // Símbolo aleatorio
+            }
+        }
+    }
+
+    // Insertar carácter aleatorio en la pila
+    public void agregarCaracterAleatorio() {
+        if (esCompleta()) {
+            System.out.println("¡Pila llena! No se pueden agregar más elementos.");
+        } else {
+            char nuevoCaracter;
+            do {
+                nuevoCaracter = crearCaracterAleatorio();
+            } while (existeEnPila(nuevoCaracter)); // No permite duplicados
+            elementos[++indiceTope] = nuevoCaracter;
+            System.out.println("Se agregó: '" + nuevoCaracter + "' a la pila.");
+        }
+    }
+
+    // Eliminar el último carácter añadido
+    public void quitarCaracter() {
+        if (esVacia()) {
+            System.out.println("Pila vacía. No hay elementos para eliminar.");
+        } else {
+            char eliminado = elementos[indiceTope--];
+            System.out.println("Se eliminó: '" + eliminado + "' de la pila.");
+        }
+    }
+
+    // Verificar si un carácter ya está presente en la pila
+    private boolean existeEnPila(char caracter) {
+        for (int i = 0; i <= indiceTope; i++) {
+            if (elementos[i] == caracter) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Mostrar los elementos de la pila
+    public void mostrarPila(String nombre) {
+        if (esVacia()) {
+            System.out.println("La " + nombre + " está vacía.");
+        } else {
+            System.out.print("Elementos en " + nombre + ": ");
+            for (int i = 0; i <= indiceTope; i++) {
+                System.out.print(elementos[i] + " ");
+            }
+            System.out.println();
+        }
+    }
+
+    // Unir dos pilas en una nueva
+    public static PilaCaracteresPersonalizada combinarPilas(PilaCaracteresPersonalizada pilaA, PilaCaracteresPersonalizada pilaB) {
+        PilaCaracteresPersonalizada pilaCombinada = new PilaCaracteresPersonalizada();
+        
+        // Insertar elementos de la primera pila
+        for (int i = 0; i <= pilaA.indiceTope; i++) {
+            pilaCombinada.elementos[++pilaCombinada.indiceTope] = pilaA.elementos[i];
+        }
+        
+        // Insertar elementos de la segunda pila, evitando duplicados
+        for (int i = 0; i <= pilaB.indiceTope; i++) {
+            if (!pilaCombinada.existeEnPila(pilaB.elementos[i])) {
+                pilaCombinada.elementos[++pilaCombinada.indiceTope] = pilaB.elementos[i];
+            }
+        }
+
+        return pilaCombinada;
+    }
+
+    // Menú de opciones del programa
+    public static void main(String[] args) {
+        PilaCaracteresPersonalizada pilaA = new PilaCaracteresPersonalizada();
+        PilaCaracteresPersonalizada pilaB = new PilaCaracteresPersonalizada();
+        PilaCaracteresPersonalizada pilaResultado;
+        try (Scanner entrada = new Scanner(System.in)) {
+            char opcion;
+            
+            do {
+                System.out.println("\n--- Menú de opciones ---");
+                System.out.println("1. Llenar pila A con caracteres aleatorios");
+                System.out.println("2. Llenar pila B con caracteres aleatorios");
+                System.out.println("3. Mostrar pila A");
+                System.out.println("4. Mostrar pila B");
+                System.out.println("5. Combinar pilas A y B, y mostrar");
+                System.out.println("6. Salir");
+                System.out.print("Selecciona una opción: ");
+                opcion = entrada.next().charAt(0);
+                
+                switch (opcion) {
+                    case '1' -> {
+                        for (int i = 0; i < 10; i++) {
+                            pilaA.agregarCaracterAleatorio();
+                        }
+                    }
+                    case '2' -> {
+                        for (int i = 0; i < 10; i++) {
+                            pilaB.agregarCaracterAleatorio();
+                        }
+                    }
+                    case '3' -> pilaA.mostrarPila("Pila A");
+                    case '4' -> pilaB.mostrarPila("Pila B");
+                    case '5' -> {
+                        pilaResultado = combinarPilas(pilaA, pilaB);
+                        pilaResultado.mostrarPila("Pila combinada");
+                    }
+                    case '6' -> System.out.println("Finalizando programa...");
+                    default -> System.out.println("Opción no válida. Por favor intenta nuevamente.");
+                }
+            } while (opcion != '6');
+        }
+    }
+}
